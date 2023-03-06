@@ -12,15 +12,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Auth Google Cloud SDK
+      uses: uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}'
+
     - name: Configure Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
-      with:
-        version: '290.0.1'
-        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
-        service_account_email: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_EMAIL }}
-        service_account_key: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
-      env:
-        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+
+    - name: 'Use gcloud CLI'
+      run: 'gcloud info'
 
     - name: Configure kubectl
       run: |
