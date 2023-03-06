@@ -28,7 +28,7 @@ jobs:
         export DOCKER_TAG=${{ github.sha }}
         export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
         docker build -t $DOCKER_IMAGE .
-        docker push $DOCKER_IMAGE
+        sudo -u $USER docker push $DOCKER_IMAGE
 
     # - name: Configure kubectl
     #   run: |
