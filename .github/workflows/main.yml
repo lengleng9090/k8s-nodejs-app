@@ -2,39 +2,48 @@ name: Deploy to GKE
 
 on:
   push:
-    branches: [ main ]
-
-env:
-  PROJECT_ID: even-advantage-339309
-  IMAGE_NAME: simple-app-nodejs
-  CLUSTER_NAME: simple-nodejs-app
-  ZONE: asia-southeast1-a
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
-      - name: Set up Google Cloud
-      - name: Build and push Docker image
-        id: docker_build
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: |
-            gcr.io/$PROJECT_ID/$IMAGE_NAME:latest
-            gcr.io/$PROJECT_ID/$IMAGE_NAME:${{ github.sha }}
-        env:
-          PROJECT_ID: ${{ env.PROJECT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-      - name: Deploy to GKE
-        id: deploy
-        uses: GoogleCloudPlatform/github-actions/deploy-gke@main
-        with:
-          credentials: ${{ secrets.GKE_SA_KEY }}
-          project_id: ${{ env.PROJECT_ID }}
-          cluster_name: ${{ env.CLUSTER_NAME }}
-          location: ${{ env.ZONE }}
-          images: gcr.io/$PROJECT_ID/$IMAGE_NAME:${{ github.sha }}
-          image_pull_secret: gcr-json-key
+    - uses: actions/checkout@v2
+
+    - name: Configure Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
+        service_account_email: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_EMAIL }}
+        service_account_key: ${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}
+      env:
+        KUBECONFIG: ${{ github.workspace }}/kubeconfig.yaml
+
+    - name: Configure kubectl
+      run: |
+        gcloud container clusters get-credentials simple-nodejs-app --zone asia-southeast1-a --project even-advantage-339309
+        kubectl config use-context gke_even-advantage-339309_asia-southeast1-a_simple-nodejs-app
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build Docker image
+      run: |
+        export DOCKER_TAG=${{ github.sha }}
+        export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/my-node-app:${DOCKER_TAG}
+        docker build -t $DOCKER_IMAGE .
+        docker push $DOCKER_IMAGE
+
+    - name: Deploy to Kubernetes
+      uses: appleboy/kubectl-action@master
+      with:
+        args: |
+          set image deployment/my-node-app my-node-app=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/my-node-app:${DOCKER_TAG}
