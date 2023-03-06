@@ -6,11 +6,12 @@ on:
       - main
 
 jobs:
-  deploy:
+  integration-deployment:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
     - name: Auth Google Cloud SDK
       uses: 'google-github-actions/auth@v1'
@@ -30,21 +31,12 @@ jobs:
         docker build -t $DOCKER_IMAGE .
         docker push $DOCKER_IMAGE
 
-    # - name: Configure kubectl
-    #   run: |
-    #     gcloud container clusters get-credentials simple-nodejs-app --zone asia-southeast1-a --project even-advantage-339309
-    #     kubectl config use-context gke_even-advantage-339309_asia-southeast1-a_simple-nodejs-app
+    - name: Configure kubectl
+      run: |
+        gcloud container clusters get-credentials simple-nodejs-app --zone asia-southeast1-a --project even-advantage-339309
+        kubectl config use-context gke_even-advantage-339309_asia-southeast1-a_simple-nodejs-app
 
-    # - name: Set up Node.js
-    #   uses: actions/setup-node@v2
-    #   with:
-    #     node-version: '14.x'
-
-    # - name: Install dependencies
-    #   run: npm install
-
-    # - name: Deploy to Kubernetes
-    #   uses: appleboy/kubectl-action@master
-    #   with:
-    #     args: |
-    #       set image deployment/simple-app-nodejs simple-app-nodejs=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl apply -f ./k8s/deployment.yaml
+        kubectl apply -f ./k8s/service.yaml
