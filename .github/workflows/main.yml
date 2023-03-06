@@ -42,8 +42,8 @@ jobs:
         docker build -t $DOCKER_IMAGE .
         docker push $DOCKER_IMAGE
 
-    - name: Deploy to Kubernetes
-      uses: appleboy/kubectl-action@master
-      with:
-        args: |
-          set image deployment/simple-app-nodejs simple-app-nodejs=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
+    # - name: Deploy to Kubernetes
+    #   uses: appleboy/kubectl-action@master
+    #   with:
+    #     args: |
+    #       set image deployment/simple-app-nodejs simple-app-nodejs=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
