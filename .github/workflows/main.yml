@@ -12,23 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Auth Google Cloud SDK
+      uses: 'google-github-actions/auth@v1'
+      with:
+        credentials_json: '${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}'
+
+    - name: Configure Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+
+    - name: 'Use gcloud CLI'
+      run: 'gcloud auth configure-docker'
+
     - name: Build Docker image
       run: |
         export DOCKER_TAG=${{ github.sha }}
         export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
         docker build -t $DOCKER_IMAGE .
         docker push $DOCKER_IMAGE
-
-    # - name: Auth Google Cloud SDK
-    #   uses: 'google-github-actions/auth@v1'
-    #   with:
-    #     credentials_json: '${{ secrets.GCLOUD_SERVICE_ACCOUNT_KEY }}'
-
-    # - name: Configure Google Cloud SDK
-    #   uses: google-github-actions/setup-gcloud@v1
-
-    # - name: 'Use gcloud CLI'
-    #   run: 'gcloud info'
 
     # - name: Configure kubectl
     #   run: |
