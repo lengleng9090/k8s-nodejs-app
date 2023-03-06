@@ -13,7 +13,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Configure Google Cloud SDK
-      uses: google-github-actions/setup-gcloud@master
+      uses: google-github-actions/setup-gcloud@v1
       with:
         version: '290.0.1'
         project_id: ${{ secrets.GCLOUD_PROJECT_ID }}
@@ -38,7 +38,7 @@ jobs:
     - name: Build Docker image
       run: |
         export DOCKER_TAG=${{ github.sha }}
-        export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/my-node-app:${DOCKER_TAG}
+        export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
         docker build -t $DOCKER_IMAGE .
         docker push $DOCKER_IMAGE
 
@@ -46,4 +46,4 @@ jobs:
       uses: appleboy/kubectl-action@master
       with:
         args: |
-          set image deployment/my-node-app my-node-app=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/my-node-app:${DOCKER_TAG}
+          set image deployment/simple-app-nodejs simple-app-nodejs=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
