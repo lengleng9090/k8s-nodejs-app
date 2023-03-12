@@ -21,7 +21,7 @@ jobs:
     - name: Configure Google Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
 
-    - name: 'Use gcloud CLI'
+    - name: Use gcloud CLI
       run: 'gcloud auth configure-docker'
 
     - name: Set up Docker Buildx
@@ -41,10 +41,16 @@ jobs:
     #     docker build -t $DOCKER_IMAGE .
     #     docker push $DOCKER_IMAGE
 
-    - name: Configure kubectl
-      run: |
-        gcloud container clusters get-credentials simple-nodejs-app --zone asia-southeast1-a --project even-advantage-339309
-        kubectl config use-context gke_even-advantage-339309_asia-southeast1-a_simple-nodejs-app
+    # - name: Configure kubectl
+    #   run: |
+    #     gcloud container clusters get-credentials simple-nodejs-app --zone asia-southeast1-a --project even-advantage-339309
+    #     kubectl config use-context gke_even-advantage-339309_asia-southeast1-a_simple-nodejs-app
+
+    - name: Authenticating GKE
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: 'simple-nodejs-app'
+        location: 'asia-southeast1-a'
 
     - name: Deploy to Kubernetes
       run: |
