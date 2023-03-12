@@ -15,5 +15,6 @@ spec:
       containers:
         - name: simple-nodejs-app
           image: gcr.io/even-advantage-339309/simple-app-nodejs:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
