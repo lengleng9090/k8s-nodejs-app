@@ -1,4 +1,4 @@
-name: Deploy to GKE
+name: Deploy application to GKE
 
 on:
   push:
@@ -34,6 +34,20 @@ jobs:
         tags: |
           gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${{ github.sha }}
 
+    - name: Authenticating GKE
+      uses: 'google-github-actions/get-gke-credentials@v1'
+      with:
+        cluster_name: 'simple-nodejs-app'
+        location: 'asia-southeast1-a'
+    
+    - name: Configure kubectl
+      uses: steebchen/kubectl@v1.0.0
+    
+    - name: Apply deployment.yaml and service.yaml
+      run: |
+        kubectl apply -f ./k8s/deployment.yaml
+        kubectl apply -f ./k8s/service.yaml
+
     # - name: Build Docker image
     #   run: |
     #     export DOCKER_TAG=${{ github.sha }}
@@ -45,22 +59,6 @@ jobs:
     #   run: |
     #     gcloud container clusters get-credentials simple-nodejs-app --zone asia-southeast1-a --project even-advantage-339309
     #     kubectl config use-context gke_even-advantage-339309_asia-southeast1-a_simple-nodejs-app
-
-    - name: Authenticating GKE
-      uses: 'google-github-actions/get-gke-credentials@v1'
-      with:
-        cluster_name: 'simple-nodejs-app'
-        location: 'asia-southeast1-a'
-    
-    - name: Configure kubectl
-      uses: steebchen/kubectl@v1.0.0
-      with:
-        version: "latest"
-    
-    - name: Apply deployment.yaml and service.yaml
-      run: |
-        kubectl apply -f ./k8s/deployment.yaml
-        kubectl apply -f ./k8s/service.yaml
 
     # - name: Deploy to Kubernetes
     #   run: |
