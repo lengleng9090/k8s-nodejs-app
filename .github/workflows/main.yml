@@ -24,12 +24,22 @@ jobs:
     - name: 'Use gcloud CLI'
       run: 'gcloud auth configure-docker'
 
-    - name: Build Docker image
-      run: |
-        export DOCKER_TAG=${{ github.sha }}
-        export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
-        docker build -t $DOCKER_IMAGE .
-        docker push $DOCKER_IMAGE
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build and push
+      uses: docker/build-push-action@v4
+      with:
+        push: true
+        tags: |
+          gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${{ github.sha }}
+
+    # - name: Build Docker image
+    #   run: |
+    #     export DOCKER_TAG=${{ github.sha }}
+    #     export DOCKER_IMAGE=gcr.io/${{ secrets.GCLOUD_PROJECT_ID }}/simple-app-nodejs:${DOCKER_TAG}
+    #     docker build -t $DOCKER_IMAGE .
+    #     docker push $DOCKER_IMAGE
 
     - name: Configure kubectl
       run: |
