@@ -12,7 +12,7 @@ app.get('/health', (req, res) => {
     })
 })
 
-app.get('/', (req, res) => {
+app.get('/hello-world', (req, res) => {
     res.send({
         status: 'hello world'
     })
